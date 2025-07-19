@@ -1,1 +1,649 @@
-oi
+<!DOCTYPE html>
+
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reprograma-T: E-book de Apresentação Geral</title>
+<style>
+:root {
+--cor-principal: #6a1b9a; /* Roxo profundo */
+--cor-secundaria: #f3e5f5; /* Lavanda claro */
+--cor-texto: #333;
+--cor-fundo-main: #ffffff;
+--cor-fundo-sidebar: #f7f7f7;
+--cor-hover: #e1bee7; /* Lilás */
+--sombra-leve: rgba(0, 0, 0, 0.05);
+--sombra-media: rgba(106, 27, 154, 0.3);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+background-color: var(--cor-fundo-sidebar);
+line-height: 1.6;
+height: 100vh;
+display: flex;
+flex-direction: column;
+overflow: hidden;
+}
+.page-header {
+display: flex;
+align-items: center;
+padding: 10px 25px;
+background-color: var(--cor-fundo-main);
+border-bottom: 1px solid #e0e0e0;
+flex-shrink: 0;
+box-shadow: 0 2px 5px var(--sombra-leve);
+z-index: 10;
+}
+.page-header img { height: 45px; margin-right: 15px; }
+.page-header h1 { font-size: 1.5rem; font-weight: 500; color: var(--cor-principal); }
+.app-container { display: flex; flex-grow: 1; overflow: hidden; }
+.sidebar {
+flex: 0 0 340px;
+background-color: var(--cor-fundo-sidebar);
+padding: 25px 15px;
+overflow-y: auto;
+border-right: 1px solid #e0e0e0;
+}
+.sidebar.sidebar-right { border-right: none; border-left: 1px solid #e0e0e0; }
+.accordion-title {
+padding: 12px 15px;
+background-color: #e9e9e9;
+border-radius: 8px;
+cursor: pointer;
+font-weight: bold;
+margin-bottom: 10px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+transition: background-color 0.2s ease;
+}
+.accordion-title:hover { background-color: #ddd; }
+.accordion-title::after { content: '+'; font-size: 1.5rem; color: var(--cor-principal); transition: transform 0.3s ease; }
+.accordion-title.active::after { transform: rotate(45deg); }
+.accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-in-out; padding-left: 10px; }
+.accordion-content ul { list-style-type: none; }
+.accordion-content ul li {
+padding: 10px 15px;
+margin-bottom: 5px;
+border-radius: 6px;
+cursor: pointer;
+transition: all 0.2s ease;
+font-weight: 500;
+border-left: 3px solid transparent;
+font-size: 0.95rem;
+}
+.accordion-content ul li:hover { background-color: var(--cor-hover); border-left: 3px solid var(--cor-principal); }
+.accordion-content ul li.active {
+background-color: var(--cor-principal);
+color: white;
+font-weight: 600;
+box-shadow: 0 4px 12px var(--sombra-media);
+transform: translateX(4px) scale(1.02);
+border-left: 3px solid var(--cor-principal);
+}
+.main-content { flex-grow: 1; background-color: var(--cor-fundo-main); overflow-y: auto; position: relative; padding: 40px; }
+.slide { display: none; animation: fadeIn 0.6s ease forwards; }
+.slide.active { display: block; }
+.slide h2 { color: var(--cor-principal); margin-bottom: 25px; font-size: 2rem; border-bottom: 2px solid var(--cor-secundaria); padding-bottom: 10px; }
+.slide h4 { color: #555; margin-top: 25px; margin-bottom: 10px; font-weight: 600; font-size: 1.1rem; }
+.slide p, .slide ul { margin-bottom: 15px; max-width: 75ch; }
+.slide p { font-size: 1.05rem; color: #444; }
+.slide ul { list-style-position: inside; padding-left: 10px; }
+.slide ul li { margin-bottom: 8px; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.carousel-container { position: relative; width: 100%; margin-top: 30px; padding: 0 50px; }
+.carousel-viewport { overflow: hidden; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+.carousel-track { display: flex; transition: transform 0.5s ease-in-out; }
+.carousel-card { flex: 0 0 100%; padding: 25px; background-color: var(--cor-fundo-sidebar); }
+.carousel-card h5 { font-size: 1.2rem; color: var(--cor-principal); margin-bottom: 10px; }
+.carousel-btn {
+position: absolute; top: 50%; transform: translateY(-50%); background-color: white;
+border: 1px solid #ccc; border-radius: 50%; width: 40px; height: 40px;
+cursor: pointer; font-size: 1.5rem; color: var(--cor-principal); z-index: 5;
+box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+}
+.carousel-btn.prev { left: 0; }
+.carousel-btn.next { right: 0; }
+.carousel-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.linked-word { color: var(--cor-principal); font-weight: 600; cursor: pointer; border-bottom: 2px dashed var(--cor-hover); transition: background-color 0.2s; }
+.linked-word:hover { background-color: var(--cor-secundaria); }
+#modal-overlay {
+position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7);
+display: flex; justify-content: center; align-items: center; z-index: 1000;
+opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+#modal-overlay.visible { opacity: 1; visibility: visible; }
+#modal-content {
+background: white; padding: 30px; border-radius: 10px; max-width: 600px; width: 90%;
+position: relative; transform: scale(0.95); transition: transform 0.3s ease;
+}
+#modal-overlay.visible #modal-content { transform: scale(1); }
+#modal-close-btn { position: absolute; top: 10px; right: 15px; background: transparent; border: none; font-size: 2rem; color: #aaa; cursor: pointer; }
+#modal-term-title { font-size: 1.8rem; color: var(--cor-principal); margin-bottom: 15px; }
+#modal-term-definition { margin-bottom: 20px; }
+#modal-topic-link-btn {
+background-color: var(--cor-principal); color: white; border: none; padding: 10px 15px;
+border-radius: 5px; cursor: pointer; font-weight: bold; transition: background-color 0.2s;
+}
+#modal-topic-link-btn:hover { background-color: #56167a; }
+@media (max-width: 900px) {
+body { overflow: auto; height: auto; }
+.app-container { flex-direction: column; }
+.sidebar { flex-basis: auto; width: 100%; border-right: none; border-bottom: 1px solid #e0e0e0; max-height: 50vh; }
+}
+</style>
+</head>
+<body>
+<header class="page-header">
+    <img src="https://reprograma-t.github.io/logo.png" alt="Logo Reprograma-T">
+    <h1>E-book de Apresentação Geral</h1>
+</header>
+
+<div class="app-container">
+    <!-- BARRA LATERAL ESQUERDA - PAUTAS -->
+    <aside class="sidebar sidebar-left">
+        <div class="accordion-group">
+            <h4 class="accordion-title">1. Luanny: A Origem</h4>
+            <div class="accordion-content">
+                <ul>
+                    <li data-slide="slide-1-1">1.1. O Legado da Avó</li>
+                    <li data-slide="slide-1-2">1.2. O Sonho</li>
+                    <li data-slide="slide-1-3">1.3. A Motivação</li>
+                    <li data-slide="slide-1-4">1.4. Obstáculo e Solução</li>
+                </ul>
+            </div>
+        </div>
+        <div class="accordion-group">
+            <h4 class="accordion-title">2. A Rede: Crítica e Oportunidade</h4>
+            <div class="accordion-content">
+                <ul>
+                    <li data-slide="slide-2-1">2.1. Lacunas do Cenário Atual</li>
+                    <li data-slide="slide-2-2">2.2. Necessidades Não Atendidas</li>
+                    <li data-slide="slide-2-3">2.3. A Solução Proposta</li>
+                </ul>
+            </div>
+        </div>
+        <div class="accordion-group">
+            <h4 class="accordion-title">3. A Filosofia em Ação</h4>
+            <div class="accordion-content">
+                <ul>
+                    <li data-slide="slide-3-1">3.1. Reprograma-T: O Nome</li>
+                    <li data-slide="slide-3-2">3.2. A Comunicação e o Público</li>
+                    <li data-slide="slide-3-3">3.3. O Convite à Transformação</li>
+                </ul>
+            </div>
+        </div>
+        <div class="accordion-group">
+            <h4 class="accordion-title">4. Visão de Longo Prazo</h4>
+            <div class="accordion-content">
+                <ul>
+                    <li data-slide="slide-4-1">4.1. Redefinindo Reprodução</li>
+                    <li data-slide="slide-4-2">4.2. A Utopia Pragmática</li>
+                    <li data-slide="slide-4-3">4.3. Estratégia e Inovação</li>
+                </ul>
+            </div>
+        </div>
+        <div class="accordion-group">
+            <h4 class="accordion-title">5. Módulos: Arquitetura do Cuidado</h4>
+            <div class="accordion-content">
+                <ul>
+                    <li data-slide="slide-5-1">5.1. Pilar I: Segurança Psicológica</li>
+                    <li data-slide="slide-5-2">5.2. Pilar II: Comunicação Consciente</li>
+                    <li data-slide="slide-5-3">5.3. Pilar III: Crescimento e Autonomia</li>
+                </ul>
+            </div>
+        </div>
+        <div class="accordion-group">
+            <h4 class="accordion-title">6. Modelo de Negócio</h4>
+            <div class="accordion-content">
+                <ul>
+                    <li data-slide="slide-6-1">6.1. Fontes de Receita e Isenção</li>
+                    <li data-slide="slide-6-2">6.2. Dados Agregados e Economia Circular</li>
+                </ul>
+            </div>
+        </div>
+        <div class="accordion-group">
+            <h4 class="accordion-title">7. Convite à Colaboração</h4>
+            <div class="accordion-content">
+                <ul>
+                    <li data-slide="slide-7-1">7.1. Filosofia da Equipe e Status</li>
+                    <li data-slide="slide-7-2">7.2. O Time dos Sonhos (Funções)</li>
+                </ul>
+            </div>
+        </div>
+        <div class="accordion-group">
+            <h4 class="accordion-title">8. Manifesto: Conclusão</h4>
+            <div class="accordion-content">
+                <ul>
+                    <li data-slide="slide-8-1">8.1. Reprograma-T como Movimento</li>
+                    <li data-slide="slide-8-2">8.2. Roadmap e Mensagem Final</li>
+                </ul>
+            </div>
+        </div>
+    </aside>
+
+    <!-- CONTEÚDO CENTRAL -->
+    <main class="main-content">
+        <!-- SLIDES DA SEÇÃO 1 -->
+        <div id="slide-1-1" class="slide">
+            <h2>1.1. O Legado da Avó</h2>
+            <p>"No dia do meu aniversário, minha avó se foi. Ela foi a última pessoa que eu amava de uma forma visceral, e talvez a única que me amou da mesma maneira."</p>
+            <p>A dor da perda se transformou no catalisador do projeto. A memória da avó, que representava amor incondicional e sabedoria, tornou-se o <span class="linked-word" data-term="legado">legado</span> fundamental sobre o qual o Reprograma-T é construído. Não é um projeto nascido do luto, mas sim de uma herança de cuidado e propósito que transforma a dor em ação.</p>
+        </div>
+        <div id="slide-1-2" class="slide">
+            <h2>1.2. O Sonho: Forbes</h2>
+            <p>O sonho que apresento se chama REPROGRAMA-T. Uma rede social. Um sonho de no mínimo 1 bilhão de dólares. O objetivo é simples: Forbes.</p>
+            <p>A ambição de chegar à lista da Forbes não é sobre riqueza pessoal. É um objetivo estratégico para romper barreiras sistêmicas, quebrar a <span class="linked-word" data-term="bolha">bolha da invisibilidade</span> e estabelecer um novo paradigma de sucesso, onde uma travesti pode ser uma referência de inovação tecnológica e impacto social, provando que o topo também pode ser nosso.</p>
+        </div>
+        <div id="slide-1-3" class="slide">
+            <h2>1.3. A Motivação Coletiva</h2>
+            <p>O propósito central é o impacto coletivo. A ideia não é "chegar lá" sozinha, mas criar uma plataforma e um movimento que "levem o máximo de pessoas comigo". O sucesso é medido pelo empoderamento financeiro e emocional da comunidade, não pelo glamour individual. É sobre criar pontes, não muros.</p>
+        </div>
+         <div id="slide-1-4" class="slide">
+            <h2>1.4. O Obstáculo e a Solução</h2>
+            <p>A principal dificuldade encontrada foi comunicar uma visão tão complexa e multifacetada, recebendo respostas constantes de "não" ou de incompreensão. A solução pessoal foi parar de apenas contar e começar a mostrar.</p>
+            <p>Este protótipo vivo é a materialização da visão, uma ferramenta para demonstrar o potencial do Reprograma-T de forma tangível e interativa, provando que a ideia é viável e necessária.</p>
+        </div>
+
+        <!-- SLIDES DA SEÇÃO 2 -->
+        <div id="slide-2-1" class="slide">
+            <h2>2.1. Lacunas do Cenário Atual</h2>
+            <h4>Polarização e Cultura do "Nós vs. Eles"</h4>
+            <p>As redes sociais atuais prosperam na divisão e no conflito, criando ambientes digitais tóxicos e excludentes.</p>
+            <h4>Algoritmos Desumanizantes</h4>
+            <p>O foco em engajamento superficial e performance tóxica penaliza a <span class="linked-word" data-term="autenticidade">autenticidade</span> e a vulnerabilidade, recompensando o escândalo.</p>
+            <h4>Falhas Sistêmicas</h4>
+            <p>Os espaços digitais são frequentemente hostis ou inadequados para comunidades LGBTQIAPN+ e neurodivergentes, que enfrentam riscos e falta de ferramentas de proteção e acessibilidade.</p>
+        </div>
+        <div id="slide-2-2" class="slide">
+            <h2>2.2. Necessidades Não Atendidas</h2>
+            <p>O mercado digital atual falha em prover:</p>
+            <ul>
+                <li>Ferramentas robustas de <strong>Segurança Psicológica e Digital</strong>.</li>
+                <li>Mecanismos para <strong>Comunicação Empática</strong> e resolução de conflitos, como a <span class="linked-word" data-term="cnv">CNV</span>.</li>
+                <li>Espaços seguros para a partilha da <strong>Vulnerabilidade</strong> e da <strong>Autenticidade</strong>.</li>
+                <li>Plataformas que, em seu cerne, promovam ativamente o <strong>bem-estar</strong> e o <strong>crescimento pessoal</strong>.</li>
+            </ul>
+        </div>
+        <div id="slide-2-3" class="slide">
+            <h2>2.3. A Solução Proposta: Reprograma-T</h2>
+            <p>A resposta a essas lacunas é um <strong>ecossistema digital focado em cuidado</strong>.</p>
+            <p>Aqui, a tecnologia é usada como uma ponte para a empatia, não como uma ferramenta para o lucro a qualquer custo. A plataforma é construída "de dentro para fora", ou seja, a partir das necessidades reais e vividas pela comunidade que visa servir, garantindo que cada funcionalidade tenha um propósito de acolhimento.</p>
+        </div>
+        
+        <!-- SLIDES DA SEÇÃO 3 -->
+        <div id="slide-3-1" class="slide">
+            <h2>3.1. Reprograma-T: O Significado do Nome</h2>
+            <h4>Reprograma Trans</h4>
+            <p>O nome afirma a <span class="linked-word" data-term="representatividade">representatividade</span> e a centralidade da experiência trans e travesti como a força motriz e a perspectiva fundadora do projeto. É uma declaração de identidade e poder.</p>
+            <h4>Reprograma Transformação</h4>
+            <p>O nome também aponta para o objetivo principal da plataforma: oferecer ferramentas para o autoconhecimento, a cura de traumas e o desenvolvimento pessoal, permitindo que os usuários "reprogramem" padrões internos e transformem suas vidas.</p>
+        </div>
+        <div id="slide-3-2" class="slide">
+            <h2>3.2. A Comunicação e o Público</h2>
+            <h4>Fundamentada na CNV</h4>
+            <p>Toda a comunicação na plataforma é estruturada com base na <span class="linked-word" data-term="cnv">Comunicação Não-Violenta</span>. Isso se reflete nas ferramentas de postagem, nas reações e na mediação de conflitos, criando um ambiente de escuta e empatia.</p>
+            <h4>Foco no Acolhimento</h4>
+            <p>O público-alvo prioritário são as comunidades LGBTQIAPN+ e pessoas neurodivergentes, pois são as que mais sofrem com a hostilidade e a falta de acessibilidade das redes atuais. O Reprograma-T é desenhado para atender às suas necessidades específicas de segurança e bem-estar.</p>
+        </div>
+         <div id="slide-3-3" class="slide">
+            <h2>3.3. O Convite à Transformação</h2>
+            <h4>O Manual da Vida</h4>
+            <p>Através de ferramentas como o <strong>Livro Conexão</strong>, a tecnologia é usada para guiar processos de cura e autodescoberta, transformando narrativas de dor em jornadas de resiliência.</p>
+            <h4>Seja Você e Desarme-se</h4>
+            <p>A plataforma valoriza a <span class="linked-word" data-term="autenticidade">autenticidade</span> sobre a performance. É um convite para abandonar a reatividade e as armaduras sociais, abraçando a escuta e a vulnerabilidade como forças.</p>
+            <h4>A Bolha Imposta</h4>
+            <p>A missão central é romper as barreiras invisíveis que limitam o potencial de comunidades marginalizadas, furando a <span class="linked-word" data-term="bolha">bolha</span> imposta pelo preconceito e pela falta de acesso.</p>
+        </div>
+
+        <!-- SLIDES DA SEÇÃO 4 -->
+        <div id="slide-4-1" class="slide">
+            <h2>4.1. Redefinindo Reprodução: A Tese do Legado</h2>
+            <p>A visão de longo prazo questiona paradigmas. Se o ciclo biológico é "nascer, crescer, se reproduzir e morrer", e existe o estigma de que "travesti não reproduz", o Reprograma-T propõe uma redefinição.</p>
+            <p><strong>A tese da reprodução por legado:</strong> Criar algo para o futuro — seja arte, conhecimento, ou uma comunidade segura — é uma forma poderosa de reprodução. Ao construir e deixar um <span class="linked-word" data-term="legado">legado</span>, a travesti se reproduz no tempo e no espaço, quebrando o ciclo de dificuldades e garantindo um futuro melhor para as próximas gerações.</p>
+        </div>
+        <div id="slide-4-2" class="slide">
+            <h2>4.2. A Utopia Pragmática</h2>
+            <p>A filosofia do projeto reconhece que talvez não vivamos no mundo perfeito. No entanto, a mudança é possível através de uma abordagem pragmática:</p>
+            <ul>
+                <li>Podemos <strong>Reprogramar</strong> nossos sistemas internos e nossa forma de nos relacionarmos.</li>
+                <li>Podemos <strong>Transformar</strong> nosso impacto no mundo, focando em ser 0,00001% melhor que ontem.</li>
+            </ul>
+            <p>É uma busca por progresso contínuo e tangível, em vez de esperar por uma perfeição inalcançável.</p>
+        </div>
+        <div id="slide-4-3" class="slide">
+            <h2>4.3. Estratégia e Inovação</h2>
+            <h4>A Falácia do "Nós vs. Eles"</h4>
+            <p>Esta é uma armadilha que nos impede de ver a solução. O projeto evita o confronto direto e foca na construção da alternativa.</p>
+            <h4>O Paradoxo do Foco</h4>
+            <p>Fortalecemos um problema quando focamos apenas nele. A estratégia do Reprograma-T não é lutar contra as redes existentes, mas sim <strong>furar a bolha</strong> e criar um ecossistema tão valioso que se torne a opção preferencial.</p>
+            <h4>Inovação Fora da Caixa</h4>
+            <p>A verdadeira solução muitas vezes é encontrada fora da caixa do problema. Ao invés de tentar "consertar" o modelo atual, estamos construindo um novo, baseado em princípios radicalmente diferentes.</p>
+        </div>
+
+        <!-- SLIDES DA SEÇÃO 5 -->
+        <div id="slide-5-1" class="slide">
+             <h2>5.1. Pilar I: Segurança Psicológica</h2>
+             <p>Um conjunto de ferramentas desenhadas para criar um refúgio digital e físico, onde a vulnerabilidade é protegida e a confiança é a norma.</p>
+             <div class="carousel-container">
+                <button class="carousel-btn prev">‹</button>
+                <div class="carousel-viewport">
+                    <div class="carousel-track">
+                        <div class="carousel-card">
+                            <h5>Mapa Violeta (Geografia do Afeto)</h5>
+                            <p>Ferramenta de mapeamento colaborativo que identifica locais seguros e de risco, transformando ansiedade em ação e dados comunitários para embasar políticas públicas.</p>
+                        </div>
+                        <div class="carousel-card">
+                            <h5>Círculos de Confiança</h5>
+                            <p>Grupos privados para discussões íntimas e construção de laços de confiança, longe do feed principal e do julgamento público, permitindo maior profundidade e segurança.</p>
+                        </div>
+                    </div>
+                </div>
+                <button class="carousel-btn next">›</button>
+             </div>
+        </div>
+        <div id="slide-5-2" class="slide">
+             <h2>5.2. Pilar II: Comunicação Consciente</h2>
+             <p>Módulos que integram a <span class="linked-word" data-term="cnv">Comunicação Não-Violenta</span> na arquitetura da plataforma para transformar a maneira como nos expressamos e conectamos.</p>
+             <div class="carousel-container">
+                <button class="carousel-btn prev">‹</button>
+                <div class="carousel-viewport">
+                    <div class="carousel-track">
+                        <div class="carousel-card">
+                            <h5>Núcleo Social (Partilhas CNV)</h5>
+                            <p>O feed principal, onde postar é uma "Partilha" guiada pela CNV (Observação, Sentimento, Necessidade, Pedido). As interações são reações empáticas (ex:💡Te Entendo), focando em validação emocional.</p>
+                        </div>
+                        <div class="carousel-card">
+                            <h5>Babatá IA (O Guia Empático)</h5>
+                            <p>Uma IA projetada como um "Guia de Escuta Ativa". Oferece tours, cursos interativos e serve como um ombro amigo digital 24/7, treinado para reconhecer crises e sugerir ajuda especializada.</p>
+                        </div>
+                        <div class="carousel-card">
+                            <h5>Mensagens Privadas</h5>
+                            <p>Um sistema de chat um-para-um, seguro e direto, para que os membros da comunidade possam se comunicar de forma privada e construir laços mais íntimos, complementando a comunicação pública.</p>
+                        </div>
+                    </div>
+                </div>
+                <button class="carousel-btn next">›</button>
+             </div>
+        </div>
+        <div id="slide-5-3" class="slide">
+             <h2>5.3. Pilar III: Crescimento e Autonomia</h2>
+             <p>Recursos para o desenvolvimento pessoal, a cura de traumas, a expressão criativa e a sustentabilidade comunitária.</p>
+             <div class="carousel-container">
+                <button class="carousel-btn prev">‹</button>
+                <div class="carousel-viewport">
+                    <div class="carousel-track">
+                        <div class="carousel-card">
+                            <h5>Livro Conexão (Terapia Narrativa)</h5>
+                            <p>Módulo de terapia narrativa onde histórias de vida são transformadas em jornadas de cura interativas, com questionários de reflexão baseados na <span class="linked-word" data-term="cnv">CNV</span> para promover autoconhecimento.</p>
+                        </div>
+                        <div class="carousel-card">
+                            <h5>Templo do Afeto (Espiritualidade Inclusiva)</h5>
+                            <p>Um espaço para explorar a fé de forma inclusiva e livre de dogmas, liderado por "Guias" da própria comunidade treinados em acolhimento e escuta empática.</p>
+                        </div>
+                        <div class="carousel-card">
+                            <h5>Escola de Saberes (E-learning)</h5>
+                            <p>Plataforma de e-learning focada em <span class="linked-word" data-term="cnv">CNV</span>, <span class="linked-word" data-term="ikigai">Ikigai</span> e bem-estar, onde membros podem criar e vender cursos, fomentando a autonomia financeira.</p>
+                        </div>
+                        <div class="carousel-card">
+                            <h5>Mercado Cósmico (Classificados)</h5>
+                            <p>Uma área de classificados para a troca de serviços e produtos, fortalecendo o apoio mútuo e a economia dentro da comunidade, com taxas justas e isenção para ONGs.</p>
+                        </div>
+                        <div class="carousel-card">
+                            <h5>K-Play (Expressão Artística)</h5>
+                            <p>Uma ferramenta para composição e compartilhamento de música, oferecendo um canal não-verbal para o processamento de emoções e para que a criatividade da comunidade floresça.</p>
+                        </div>
+                    </div>
+                </div>
+                <button class="carousel-btn next">›</button>
+             </div>
+        </div>
+
+        <!-- SLIDES DA SEÇÃO 6 -->
+        <div id="slide-6-1" class="slide">
+            <h2>6.1. Fontes de Receita e Isenção</h2>
+            <p>A sustentabilidade do projeto é baseada em um modelo de negócio ético e opcional, que não penaliza o acesso básico.</p>
+            <ul>
+                <li><strong>Taxas de Serviço:</strong> Pequenas taxas sobre transações no Mercado Cósmico (ex: 5% para independentes) e na Escola de Saberes.</li>
+                <li><strong>Assinaturas Premium:</strong> Acesso a Círculos de Confiança exclusivos e versões "Pro" de ferramentas como o Babatá IA.</li>
+                <li><strong>Parcerias:</strong> Selos "Lugar de Afeto" para estabelecimentos e patrocínio de conteúdo, como no Livro Conexão.</li>
+            </ul>
+            <h4>Estratégia de Isenção</h4>
+            <p>Organizações Não Governamentais (ONGs) e projetos sociais de impacto comprovado são isentos de taxas, garantindo que o apoio à comunidade não seja financeiramente onerado.</p>
+        </div>
+        <div id="slide-6-2" class="slide">
+            <h2>6.2. Dados Agregados e Economia Circular</h2>
+            <h4>O Valor dos Dados Agregados</h4>
+            <p>Os dados coletados (sempre de forma anônima e agregada) através de ferramentas como o Mapa Violeta podem ser transformados em relatórios valiosos para embasar pesquisas acadêmicas e a criação de políticas públicas mais eficazes, gerando uma fonte de receita que também serve ao bem comum.</p>
+            <h4>Economia Circular de Cuidado</h4>
+            <p>O modelo de negócio visa criar um ciclo virtuoso: as ferramentas (Mercado Cósmico, Escola de Saberes) permitem o empoderamento financeiro dos membros da comunidade, que por sua vez reinvestem e fortalecem o ecossistema, gerando mais oportunidades para todos.</p>
+        </div>
+
+        <!-- SLIDES DA SEÇÃO 7 -->
+        <div id="slide-7-1" class="slide">
+            <h2>7.1. Filosofia da Equipe e Status Atual</h2>
+            <h4>Vivência como Expertise</h4>
+            <p>Acreditamos que a diversidade de vivências é tão crucial quanto a habilidade técnica. Priorizamos a colaboração com pessoas que compreendem profundamente as dores e necessidades que o projeto busca resolver. A equipe ideal é um reflexo da comunidade que queremos servir.</p>
+            <h4>Status Atual</h4>
+            <p>O Reprograma-T é um projeto idealizado com muito coração, atualmente em fase emergente e independente. Estamos ativamente buscando financiamento coletivo, editais e parcerias para garantir a sustentabilidade e a justa remuneração de todes os envolvides.</p>
+        </div>
+        <div id="slide-7-2" class="slide">
+            <h2>7.2. O Time dos Sonhos (Funções Essenciais)</h2>
+            <p>Para dar vida à nossa visão, buscamos talentos que ressoem com nossos valores. As funções essenciais para o núcleo inicial são:</p>
+            <ul>
+                <li><strong>Desenvolvedor(a) Full Stack</strong> (PHP, JS, Python, MySQL)</li>
+                <li><strong>UX/UI Designer Inclusivo(a)</strong> (Foco em Acessibilidade e Conforto Neurocognitivo)</li>
+                <li><strong>Psicólogo(a) Comunitário(a) / Social</strong> (Apoio na criação de espaços seguros)</li>
+                <li><strong>Moderador(a) com Escuta Ativa e CNV</strong></li>
+                <li><strong>Gestor(a) de Produto com foco em Comunidade</strong></li>
+                <li><strong>Advogado(a) especialista em Direitos Digitais e LGPD</strong></li>
+            </ul>
+            <p>Estamos abertes a conhecer talentos em todas as áreas que queiram colaborar para construir um futuro digital mais humano.</p>
+        </div>
+
+        <!-- SLIDES DA SEÇÃO 8 -->
+        <div id="slide-8-1" class="slide">
+            <h2>8.1. Reprograma-T como um Movimento</h2>
+            <p>Reprograma-T é mais do que um software; é um movimento. É um manifesto digital transformado em código. Uma tentativa ambiciosa de construir uma utopia digital funcional e sustentável.</p>
+            <p>Seu nome é literal: a plataforma busca "reprogramar" os padrões de comunicação, a percepção de segurança e a relação que temos com nós mesmos e com os outros. Cada linha de código é um ato de resistência e um passo em direção a um futuro mais inclusivo.</p>
+        </div>
+        <div id="slide-8-2" class="slide">
+            <h2>8.2. Roadmap e Mensagem Final</h2>
+            <h4>Roadmap do Projeto</h4>
+            <ul>
+                <li><strong>MVP Fechado (Versão Inicial):</strong> Em menos de 6 meses</li>
+                <li><strong>Beta Público (Aberto à Comunidade):</strong> Em 12 meses</li>
+                <li><strong>Expansão e Internacionalização:</strong> Em 24 meses</li>
+            </ul>
+            <h4>A Mensagem Final</h4>
+            <p>É um sonho. E como todo sonho, não tem preço. <strong>Mas tem um valor imensurável.</strong></p>
+            <p>Convidamos você a investir, compartilhar e sonhar com a gente. Porque quando uma travesti sobe, ela puxa muitas outras junto.</p>
+        </div>
+        
+        <!-- SLIDES DE FAQ -->
+        <div id="faq-1-1" class="slide"><h2>O que é Reprograma-T?</h2><p>É um ecossistema digital de cuidado, construído como uma rede social. Seu objetivo é oferecer um espaço seguro e ferramentas para comunicação empática, crescimento pessoal e autonomia, com foco especial nas necessidades de comunidades LGBTQIAPN+ e neurodivergentes.</p></div>
+        <div id="faq-1-2" class="slide"><h2>Quem pode participar?</h2><p>Qualquer pessoa alinhada à nossa cultura de respeito, empatia e comunicação não-violenta. Embora o espaço seja desenhado para priorizar as necessidades de grupos marginalizados, ele é aberto a todos que buscam um ambiente digital mais saudável.</p></div>
+        <div id="faq-1-3" class="slide"><h2>É um app de relacionamento?</h2><p>Não. O foco principal é acolhimento, Comunicação Não-Violenta (CNV) e crescimento pessoal. Amizades e amores podem acontecer como uma consequência natural de conexões autênticas, mas não é o propósito da plataforma.</p></div>
+        <div id="faq-2-1" class="slide"><h2>A plataforma é paga?</h2><p>A entrada e as funcionalidades essenciais são e sempre serão gratuitas. A sustentabilidade vem de recursos opcionais, como cursos premium, assinaturas de Círculos de Confiança exclusivos e taxas simbólicas no Mercado Cósmico.</p></div>
+        <div id="faq-2-2" class="slide"><h2>Posso vender produtos/serviços?</h2><p>Sim, através do Mercado Cósmico. Cobramos uma pequena taxa de serviço para manter a plataforma (ex: 5% para criadores independentes, 10% para marcas). ONGs e projetos sociais são isentos de taxas.</p></div>
+        <div id="faq-3-1" class="slide"><h2>Meus dados estão seguros?</h2><p>Sim. A privacidade é um pilar. Coletamos o mínimo necessário, usamos criptografia forte, anonimizamos dados sensíveis como localização (no Mapa Violeta) e jamais vendemos seus dados para terceiros.</p></div>
+        <div id="faq-3-2" class="slide"><h2>O Babatá IA é um terapeuta?</h2><p>Não. O Babatá é uma ferramenta de apoio e escuta ativa, não um substituto para terapia profissional. Ele é treinado para reconhecer situações de crise e sugerir a busca por ajuda especializada, conectando o usuário a recursos apropriados.</p></div>
+        <div id="faq-3-3" class="slide"><h2>Como me torno um "Guia" no Templo do Afeto?</h2><p>É preciso primeiro concluir o curso de Comunicação Não-Violenta (CNV) na plataforma, depois enviar uma candidatura que passa por uma revisão comunitária e, por fim, aceitar nosso código de ética de acolhimento e respeito.</p></div>
+    </main>
+
+    <!-- BARRA LATERAL DIREITA - FAQs -->
+    <aside class="sidebar sidebar-right">
+         <div class="accordion-group">
+            <h4 class="accordion-title">Geral</h4>
+            <div class="accordion-content">
+                <ul>
+                    <li data-slide="faq-1-1">O que é Reprograma-T?</li>
+                    <li data--slide="faq-1-2">Quem pode participar?</li>
+                    <li data-slide="faq-1-3">É um app de namoro?</li>
+                </ul>
+            </div>
+        </div>
+         <div class="accordion-group">
+            <h4 class="accordion-title">Modelo de Negócio</h4>
+            <div class="accordion-content">
+                <ul>
+                    <li data-slide="faq-2-1">A plataforma é paga?</li>
+                    <li data-slide="faq-2-2">Posso vender produtos/serviços?</li>
+                </ul>
+            </div>
+        </div>
+         <div class="accordion-group">
+            <h4 class="accordion-title">Segurança e Ferramentas</h4>
+            <div class="accordion-content">
+                <ul>
+                    <li data-slide="faq-3-1">Meus dados estão seguros?</li>
+                    <li data-slide="faq-3-2">O Babatá IA é um terapeuta?</li>
+                    <li data-slide="faq-3-3">Como me torno um "Guia"?</li>
+                </ul>
+            </div>
+        </div>
+    </aside>
+</div>
+
+<!-- MODAL (oculto por padrão) -->
+<div id="modal-overlay">
+    <div id="modal-content">
+        <button id="modal-close-btn">×</button>
+        <h3 id="modal-term-title"></h3>
+        <p id="modal-term-definition"></p>
+        <div id="modal-topic-link-container"></div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const definitions = {
+            'legado': { title: 'Legado', definition: 'Refere-se à herança imaterial de valores, ensinamentos e propósito deixada por alguém. No contexto do projeto, é a inspiração que impulsiona a ação, transformando a dor em um motor de mudança positiva.', link: { text: 'Ver a Tese do Legado', targetSlide: 'slide-4-1' } },
+            'bolha': { title: 'Bolha da Invisibilidade', definition: 'Uma barreira social e sistêmica, muitas vezes invisível, que impede o acesso de grupos marginalizados a espaços de poder, oportunidade e reconhecimento. A missão do Reprograma-T é "furar" essa bolha.', link: { text: 'Ver a Estratégia', targetSlide: 'slide-4-3' } },
+            'autenticidade': { title: 'Autenticidade', definition: 'A qualidade de ser genuíno e verdadeiro consigo mesmo, em oposição à performance social. A plataforma valoriza a autenticidade sobre a busca por engajamento superficial, incentivando os usuários a "serem eles mesmos".', link: { text: 'Ver o Convite à Transformação', targetSlide: 'slide-3-3' } },
+            'cnv': { title: 'CNV (Comunicação Não-Violenta)', definition: 'Um método de comunicação que foca em expressar sentimentos e necessidades sem julgamento ou crítica. É a base da interação no Reprograma-T, guiando postagens, comentários e mediação de conflitos.', link: { text: 'Ver Módulo de Comunicação', targetSlide: 'slide-5-2' } },
+            'representatividade': { title: 'Representatividade', definition: 'A presença visível e ativa de pessoas de grupos diversos e marginalizados em espaços de poder e influência. É fundamental para inspirar novas gerações, validar identidades e provar que o topo também pode ser nosso.', link: { text: 'Ver o Nome "Reprograma Trans"', targetSlide: 'slide-3-1' } },
+            'ikigai': { title: 'Ikigai (生き甲斐)', definition: 'Um conceito japonês que significa "a razão de ser". É a intersecção entre o que você ama, o que você é bom em fazer, o que o mundo precisa e o que você pode ser pago para fazer. Inspira nossa Escola de Saberes.', link: { text: 'Ver Módulo "Escola de Saberes"', targetSlide: 'slide-5-3' } }
+        };
+        
+        function setupAccordions() {
+            document.querySelectorAll('.accordion-title').forEach(title => {
+                title.addEventListener('click', function() {
+                    const content = this.nextElementSibling;
+                    const parentSidebar = this.closest('.sidebar');
+                    parentSidebar.querySelectorAll('.accordion-title').forEach(otherTitle => {
+                        if (otherTitle !== this && otherTitle.classList.contains('active')) {
+                            otherTitle.classList.remove('active');
+                            otherTitle.nextElementSibling.style.maxHeight = null;
+                        }
+                    });
+                    this.classList.toggle('active');
+                    content.style.maxHeight = this.classList.contains('active') ? content.scrollHeight + "px" : null;
+                });
+            });
+        }
+
+        function setupSlideNavigation() {
+            document.querySelectorAll('.sidebar ul li').forEach(link => {
+                link.addEventListener('click', function() { navigateToSlide(this.dataset.slide, this); });
+            });
+        }
+
+        function navigateToSlide(slideId, clickedLinkElement = null) {
+            document.querySelectorAll('.sidebar ul li').forEach(link => link.classList.remove('active'));
+            let linkToActivate = clickedLinkElement || document.querySelector(`li[data-slide="${slideId}"]`);
+            if (linkToActivate) {
+                linkToActivate.classList.add('active');
+                const parentAccordionTitle = linkToActivate.closest('.accordion-content').previousElementSibling;
+                if (parentAccordionTitle && !parentAccordionTitle.classList.contains('active')) {
+                    parentAccordionTitle.click();
+                }
+            }
+            document.querySelectorAll('.main-content .slide').forEach(slide => slide.classList.remove('active'));
+            const targetSlide = document.getElementById(slideId);
+            if (targetSlide) {
+                targetSlide.classList.add('active');
+                document.querySelector('.main-content').scrollTop = 0;
+            }
+        }
+
+        function setupAllCarousels() {
+            document.querySelectorAll('.carousel-container').forEach(setupCarousel);
+        }
+
+        function setupCarousel(container) {
+            const track = container.querySelector('.carousel-track');
+            const cards = Array.from(track.children);
+            const nextBtn = container.querySelector('.carousel-btn.next');
+            const prevBtn = container.querySelector('.carousel-btn.prev');
+            let index = 0;
+            const update = () => {
+                if (cards.length > 0) {
+                    track.style.transform = `translateX(-${index * 100}%)`;
+                    prevBtn.disabled = index === 0;
+                    nextBtn.disabled = index === cards.length - 1;
+                } else {
+                    prevBtn.disabled = true;
+                    nextBtn.disabled = true;
+                }
+            };
+            nextBtn.addEventListener('click', () => { if (index < cards.length - 1) { index++; update(); } });
+            prevBtn.addEventListener('click', () => { if (index > 0) { index--; update(); } });
+            update();
+        }
+
+        function setupLinkedWords() {
+            document.querySelectorAll('.linked-word').forEach(word => {
+                word.addEventListener('click', function() {
+                    const termData = definitions[this.dataset.term];
+                    if (termData) populateAndShowModal(termData);
+                });
+            });
+        }
+        
+        function populateAndShowModal(data) {
+            document.getElementById('modal-term-title').textContent = data.title;
+            document.getElementById('modal-term-definition').textContent = data.definition;
+            const linkContainer = document.getElementById('modal-topic-link-container');
+            linkContainer.innerHTML = '';
+            if (data.link) {
+                const btn = document.createElement('button');
+                btn.id = 'modal-topic-link-btn';
+                btn.textContent = data.link.text;
+                btn.addEventListener('click', () => { closeModal(); navigateToSlide(data.link.targetSlide); });
+                linkContainer.appendChild(btn);
+            }
+            document.getElementById('modal-overlay').classList.add('visible');
+        }
+
+        function setupModal() {
+            const overlay = document.getElementById('modal-overlay');
+            document.getElementById('modal-close-btn').addEventListener('click', closeModal);
+            overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+            document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+        }
+
+        function closeModal() { document.getElementById('modal-overlay').classList.remove('visible'); }
+        
+        function initializeAppState() {
+            const firstTitle = document.querySelector('.sidebar-left .accordion-title');
+            if (firstTitle) {
+                firstTitle.click();
+                const firstLink = firstTitle.nextElementSibling.querySelector('li');
+                if (firstLink) firstLink.click();
+            }
+        }
+
+        setupAccordions();
+        setupSlideNavigation();
+        setupAllCarousels();
+        setupLinkedWords();
+        setupModal();
+        initializeAppState();
+    });
+</script>
+
+</body>
+</html>
